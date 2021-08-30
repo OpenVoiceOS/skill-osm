@@ -40,8 +40,8 @@ ListView {
 
 //     onContentWidthChanged: if (tileViewType.view.currentIndex === 0) tileViewType.view.contentX = tileViewType.view.originX
 
-    onMovementEnded: flickEnded()
-    onFlickEnded: tileViewType.currentIndex = indexAt(mapToItem(tileViewType.contentItem, tileViewType.cellWidth, 0).x, 0)
+    //onMovementEnded: flickEnded()
+    //onFlickEnded: tileViewType.currentIndex = indexAt(mapToItem(tileViewType.contentItem, tileViewType.cellWidth, 0).x, 0)
     
     spacing: 0
     orientation: ListView.Horizontal

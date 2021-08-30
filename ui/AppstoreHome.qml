@@ -4,14 +4,30 @@ import QtQuick.Window 2.12
 import QtQuick.Layouts 1.12
 import org.kde.kirigami 2.11 as Kirigami
 import Mycroft 1.0 as Mycroft
+import "delegates" as Delegate
 
 Mycroft.Delegate {
+    id: delRoot
     skillBackgroundColorOverlay: "#20bcfc"
     leftPadding: 0
     rightPadding: 0
     topPadding: 0
     bottomPadding: 0
     property bool lviewFirstItem: lview.view.currentIndex != 0 ? 1 : 0
+    property var ovos_skills_model: sessionData.appstore_ovos_model
+    property var pling_skills_model: sessionData.appstore_pling_model
+    property Component ovos_delegate: Delegate.OVOSTileDelegate{}
+    property Component pling_delegate: Delegate.PlingTileDelegate{}
+
+    Component.onCompleted: {
+        console.log("Checking Checked Tab")
+        console.log(storeAppsGroup.checkedButton.objectName)
+    }
+
+    ButtonGroup {
+        id: storeAppsGroup
+        buttons: topButtonLayout.children
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -45,18 +61,21 @@ Mycroft.Delegate {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 height: Kirigami.Units.gridUnit * 2
-                //color: "grey"
 
                 RowLayout {
+                    id: topButtonLayout
                     width: parent.width
                     height: parent.height
                     spacing: Kirigami.Units.largeSpacing
 
                     Button {
                         id: ovosStore
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: contentItem.contentWidth + (Mycroft.Units.gridUnit * 2)
                         Layout.fillHeight: true
                         Layout.alignment: Qt.AlignVCenter
+                        checkable : true
+                        checked: true
+                        objectName: "ovos-button"
 
                         background: Rectangle {
                             color: "transparent"
@@ -67,14 +86,15 @@ Mycroft.Delegate {
                             color: "white"
                             font.bold: true
                             font.pixelSize: height * 0.9
+                            font.capitalization: Font.SmallCaps
                             verticalAlignment: Text.verticalCenter
                             horizontalAlignment: Text.horizontalCenter
-                            text: "OVOS"
+                            text: "Ovos"
 
                             Kirigami.Separator {
                                 anchors.bottom: parent.bottom
                                 anchors.bottomMargin: -Kirigami.Units.smallSpacing
-                                color: Kirigami.Theme.negativeTextColor
+                                color: storeAppsGroup.checkedButton.objectName == "ovos-button" ? Kirigami.Theme.negativeTextColor : "#313131"
                                 width: parent.contentWidth + Kirigami.Units.largeSpacing + 2
                                 height: Kirigami.Units.smallSpacing * 0.5
                             }
@@ -83,9 +103,12 @@ Mycroft.Delegate {
 
                     Button {
                         id: plingStore
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: contentItem.contentWidth + (Mycroft.Units.gridUnit * 2)
                         Layout.fillHeight: true
                         Layout.alignment: Qt.AlignVCenter
+                        checkable : true
+                        checked: false
+                        objectName: "pling-button"
 
                         background: Rectangle {
                             color: "transparent"
@@ -96,6 +119,7 @@ Mycroft.Delegate {
                             color: "white"
                             font.bold: true
                             font.pixelSize: height * 0.9
+                            font.capitalization: Font.SmallCaps
                             verticalAlignment: Text.verticalCenter
                             horizontalAlignment: Text.horizontalCenter
                             text: "Pling"
@@ -103,36 +127,7 @@ Mycroft.Delegate {
                             Kirigami.Separator {
                                 anchors.bottom: parent.bottom
                                 anchors.bottomMargin: -Kirigami.Units.smallSpacing
-                                color: "#313131" //Kirigami.Theme.negativeTextColor
-                                width: parent.contentWidth + Kirigami.Units.largeSpacing + 2
-                                height: Kirigami.Units.smallSpacing * 0.5
-                            }
-                        }
-                    }
-
-                    Button {
-                        id: andloStore
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Layout.alignment: Qt.AlignVCenter
-
-                        background: Rectangle {
-                            color: "transparent"
-                        }
-
-                        contentItem: Kirigami.Heading {
-                            level: 3
-                            color: "white"
-                            font.bold: true
-                            font.pixelSize: height * 0.9
-                            verticalAlignment: Text.verticalCenter
-                            horizontalAlignment: Text.horizontalCenter
-                            text: "Andlo's"
-
-                            Kirigami.Separator {
-                                anchors.bottom: parent.bottom
-                                anchors.bottomMargin: -Kirigami.Units.smallSpacing
-                                color: "#313131" //Kirigami.Theme.negativeTextColor
+                                color: storeAppsGroup.checkedButton.objectName == "pling-button" ? Kirigami.Theme.negativeTextColor : "#313131"
                                 width: parent.contentWidth + Kirigami.Units.largeSpacing + 2
                                 height: Kirigami.Units.smallSpacing * 0.5
                             }
@@ -145,8 +140,8 @@ Mycroft.Delegate {
                     
                     Button {
                         id: searchStore
-                        Layout.fillWidth: true
                         Layout.fillHeight: true
+                        Layout.preferredWidth: height
                         Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
 
                         background: Rectangle {
@@ -178,7 +173,7 @@ Mycroft.Delegate {
                     anchors.topMargin: Kirigami.Units.smallSpacing
                     anchors.bottomMargin: Kirigami.Units.smallSpacing
                     color: "white"
-                    text: "OpenVoiceOS Skills Appstore"
+                    text: storeAppsGroup.checkedButton.objectName == "ovos-button" ? "OpenVoiceOS Skills Appstore" : "Pling Skills Appstore"
                 }
                 
                 Button {
@@ -216,83 +211,28 @@ Mycroft.Delegate {
                 }
             }
             
-            TileView {
-                id: lview
-                focus: true
-                cellWidth: parent.width / 3.5
+            Item {
+                id: centeringItem
                 anchors.top: subTopBar.bottom
                 anchors.left: leftarrow.right
                 anchors.right: rightarrow.left
                 anchors.bottom: parent.bottom
-                model: sessionData.appstore_model
-                clip: true
-                delegate: Rectangle {
-                    readonly property Flickable listView: {
-                        var candidate = parent;
-                        while (candidate) {
-                            if (candidate instanceof Flickable) {
-                                return candidate;
-                            }
-                            candidate = candidate.parent;
-                        }
-                        return null;
+
+                TileView {
+                    id: lview
+                    focus: true
+                    width: parent.width
+                    height: parent.height
+                    cellWidth: parent.width / 3.25
+                    clip: true
+                    anchors.centerIn: parent
+                    model: switch(storeAppsGroup.checkedButton.objectName){
+                        case "ovos-button": return delRoot.ovos_skills_model; break
+                        case "pling-button": return delRoot.pling_skills_model; break
                     }
-                    
-                    implicitWidth: listView.cellWidth
-                    height: listView.height
-                    color: "transparent"
-                    
-                    Rectangle {
-                        anchors.fill: parent
-                        anchors.margins: Kirigami.Units.largeSpacing
-                        color: "#313131"
-                        
-                        Rectangle {
-                            id: imageType
-                            anchors.top: parent.top
-                            width: parent.width
-                            height: width * 0.5625
-                            color: "#212121"
-                            
-                            Image {
-                                source: model.logo
-                                anchors.centerIn: parent
-                                width: parent.width
-                                height: parent.height
-                            }
-                        }
-                        
-                        Rectangle {
-                            id: nameBand
-                            color: "#121212"
-                            anchors.top: imageType.bottom
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            height: Kirigami.Units.gridUnit * 2
-                            border.color: "#717171"
-                            border.width: 1
-                            
-                            Label {
-                                anchors.fill: parent
-                                anchors.margins: Kirigami.Units.smallSpacing
-                                color: "white"
-                                maximumLineCount: 1
-                                elide: Text.ElideRight
-                                text: model.title
-                            }
-                        }
-                        
-                        Label {
-                            id: labelType
-                            anchors.top: nameBand.bottom
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.bottom: parent.bottom
-                            anchors.margins: Kirigami.Units.smallSpacing
-                            color: "white"
-                            wrapMode: Text.WordWrap
-                            text: model.description
-                        }
+                    delegate: switch(storeAppsGroup.checkedButton.objectName){
+                        case "ovos-button": return delRoot.ovos_delegate; break
+                        case "pling-button": return delRoot.pling_delegate; break
                     }
                 }
             }
@@ -314,6 +254,13 @@ Mycroft.Delegate {
                 }
             }
         }
+
+        Delegate.InstallerBox {
+            id: installerPopBox
+            width: parent.width * 0.75
+            height: parent.height * 0.75
+            x: (parent.width - width) / 2
+            y: (parent.height - height) / 2
+        }
     }
 }
- 
