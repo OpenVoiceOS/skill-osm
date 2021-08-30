@@ -85,7 +85,7 @@ ItemDelegate {
     }
 
     onClicked: {
-        installerPopBox.skillModel = modelData
+        installerPopBox.skillModel = model
         installerPopBox.open()
     }
 }
