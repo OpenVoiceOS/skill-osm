@@ -102,8 +102,8 @@ class OSMInstaller(MycroftSkill):
             self.log.info("Selected OVOS Appstore")
             # appstore_ovos_model = self.build_ovos_skills_model()
             # self.ovos_storage["model"] = appstore_ovos_model
-            storage = self.appstores["ovos"].storage = self.build_ovos_skills_model()
-            storage.store()
+            _ = self.build_ovos_skills_model()
+            self.appstores["ovos"].storage.store()
         elif appstore == "pling":
             self.log.info("Selected Pling Appstore")
             # if "model" not in self.pling_storage:
@@ -111,8 +111,8 @@ class OSMInstaller(MycroftSkill):
                 # appstore_pling_model = self.build_pling_skills_model()
                 # self.pling_storage["model"] = appstore_pling_model
                 # self.pling_storage.store()
-                storage = self.appstores["pling"].storage = self.build_pling_skills_model()
-                storage.store()
+                _  = self.build_pling_skills_model()
+                self.appstores["pling"].storage.store()
 
         else:
             self.log.info("no valid appstore requested")
