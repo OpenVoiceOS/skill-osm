@@ -28,7 +28,7 @@ class OSMInstaller(MycroftSkill):
     def __init__(self):
         super(OSMInstaller, self).__init__(name="OSMInstaller")
         self.osm_manager = OVOSSkillsManager()
-        self.enabled_appstores: = self.osm_manager.get_active_appstores()
+        self.enabled_appstores = self.osm_manager.get_active_appstores()
         self.appstores = {}
         # self.osm_manager.enable_appstore("ovos")
         # self.osm_manager.enable_appstore("pling")
