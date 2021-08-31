@@ -99,24 +99,24 @@ class OSMInstaller(MycroftSkill):
     def build_skills_model(self, appstore):
         self.log.info("Building model for " + appstore)
 
-        if appstore == "ovos":
-            self.log.info("Selected OVOS Appstore")
-            # appstore_ovos_model = self.build_ovos_skills_model()
-            # self.ovos_storage["model"] = appstore_ovos_model
-            _ = self.build_ovos_skills_model()
-            self.appstores["ovos"].storage.store()
-        elif appstore == "pling":
-            self.log.info("Selected Pling Appstore")
-            # if "model" not in self.pling_storage:
-            if "model" not in self.appstores["pling"].storage:
-                # appstore_pling_model = self.build_pling_skills_model()
-                # self.pling_storage["model"] = appstore_pling_model
-                # self.pling_storage.store()
-                _  = self.build_pling_skills_model()
-                self.appstores["pling"].storage.store()
-
+        if appstore in self.enabled_appstores:
+            if appstore == "ovos":
+                self.log.info("Selected OVOS Appstore")
+                # appstore_ovos_model = self.build_ovos_skills_model()
+                # self.ovos_storage["model"] = appstore_ovos_model
+                _ = self.build_ovos_skills_model()
+                self.appstores["ovos"].storage.store()
+            elif appstore == "pling":
+                self.log.info("Selected Pling Appstore")
+                # if "model" not in self.pling_storage:
+                if "model" not in self.appstores["pling"].storage:
+                    # appstore_pling_model = self.build_pling_skills_model()
+                    # self.pling_storage["model"] = appstore_pling_model
+                    # self.pling_storage.store()
+                    _  = self.build_pling_skills_model()
+                    self.appstores["pling"].storage.store()
         else:
-            self.log.info("no valid appstore requested")
+            self.log.info(f"requested appstore '{appstore}' disabled or invalid")
 
     # Build Custom Display Model For OVOS Skill Store
     def build_ovos_skills_model(self):
