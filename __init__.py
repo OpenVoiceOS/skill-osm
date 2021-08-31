@@ -13,10 +13,10 @@ from json_database import JsonStorage
 
 
 class AppStoreModel:
-    self.app_store_name: str
-    self.model: list
-    self.db_loc: str
-    self.storage: JsonStorage
+    app_store_name: str
+    model: list
+    db_loc: str
+    storage: JsonStorage
 
     def __init__(self, name: str, model: list, db_loc: str):
         self.app_store_name = name
