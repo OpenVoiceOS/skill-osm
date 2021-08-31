@@ -39,8 +39,8 @@ class OSMInstaller(MycroftSkill):
         # self.plingDB = path.join(self.file_system.path, 'pling-list.db')
         # self.pling_storage = JsonStorage(self.plingDB)
 
-        for _, appstore in self.enabled_appstores:
-            self.appstores[appstore] = AppStoreModel(
+        for appstore_name, appstore in self.enabled_appstores.items():
+            self.appstores[appstore_name] = AppStoreModel(
                 name=appstore.appstore_id,
                 model=[],
                 db_loc=appstore.db
