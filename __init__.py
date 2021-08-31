@@ -167,14 +167,26 @@ class OSMInstaller(MycroftSkill):
         self.osm_manager.sync_appstores()
 
     def update_display_model(self):
-        self.build_skills_model("ovos")
-        self.build_skills_model("pling")
+        try:
+            self.build_skills_model("ovos")
+        except KeyError:
+            pass
+        try:
+            self.build_skills_model("pling")
+        except KeyError:
+            pass
         self.update_display_data()
 
     def update_display_data(self):
         self.gui["installer_status"] = 0 # Idle / Unknown
-        self.gui["appstore_ovos_model"] = self.appstores["ovos"] #self.ovos_storage["model"]
-        self.gui["appstore_pling_model"] = self.appstores["pling"] #self.pling_storage["model"]
+        try:
+            self.gui["appstore_ovos_model"] = self.appstores["ovos"].model #self.ovos_storage["model"]
+        except KeyError:
+            pass
+        try:
+            self.gui["appstore_pling_model"] = self.appstores["pling"].model #self.pling_storage["model"]
+        except KeyError:
+            pass
 
     def display_installer_success(self):
         self.log.info("Installer Successful")
