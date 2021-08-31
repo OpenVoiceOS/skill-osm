@@ -22,6 +22,7 @@ class AppStoreModel:
         self.app_store_name = name
         self.model = model
         self.db_loc = db_loc
+        self.storage = JsonStorage(db_loc)
 
 class OSMInstaller(MycroftSkill):
 
