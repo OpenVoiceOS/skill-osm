@@ -44,7 +44,7 @@ class OSMInstaller(MycroftSkill):
             self.appstores[appstore_name] = AppStoreModel(
                 name=appstore.appstore_id,
                 model=[],
-                db_loc=appstore.db
+                db_loc=appstore.db.path
             )
         self.search_skills_model = []
 
