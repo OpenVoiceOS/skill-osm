@@ -104,7 +104,7 @@ class OSMInstaller(MycroftSkill):
     # Build Custom Display Model For OVOS Skill Store
     def build_ovos_skills_model(self):
         self.appstores["ovos"].model.clear()
-        for m_skill in self.appstores["ovos"]:
+        for m_skill in self.enabled_appstores["ovos"]:
             if m_skill.skill_name is not None:
                 self.log.info(validators.url(m_skill.skill_icon))
                 if validators.url(m_skill.skill_icon):
@@ -126,7 +126,7 @@ class OSMInstaller(MycroftSkill):
     # Build Custom Display Model For Pling Skill Store
     def build_pling_skills_model(self):
         self.appstores["pling"].model.clear()
-        for m_skill in self.appstores["pling"]:
+        for m_skill in self.enabled_appstores["pling"]:
             if m_skill.skill_name is not None:
                 self.appstores["pling"].model.append({
                     "title": m_skill.skill_name,
