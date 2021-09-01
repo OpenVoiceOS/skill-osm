@@ -1,7 +1,6 @@
 import datetime
 import time
 import validators
-# from os import path
 
 from mycroft.skills.core import (MycroftSkill,
                                  intent_handler, intent_file_handler)
@@ -31,14 +30,6 @@ class OSMInstaller(MycroftSkill):
         self.osm_manager = OVOSSkillsManager()
         self.enabled_appstores = self.osm_manager.get_active_appstores()
         self.appstores = {}
-        # self.osm_manager.enable_appstore("ovos")
-        # self.osm_manager.enable_appstore("pling")
-        # self.ovos_skills_model = []
-        # self.pling_skills_model = []
-        # self.ovosDB = path.join(self.file_system.path, 'ovos-list.db')
-        # self.ovos_storage = JsonStorage(self.ovosDB)
-        # self.plingDB = path.join(self.file_system.path, 'pling-list.db')
-        # self.pling_storage = JsonStorage(self.plingDB)
 
         for appstore_name, appstore in self.enabled_appstores.items():
             self.appstores[appstore_name] = AppStoreModel(
@@ -63,8 +54,6 @@ class OSMInstaller(MycroftSkill):
         self.update_display_model()
 
         # First Sync
-        # s = self.osm_manager.get_active_appstores()
-        # self.log.info(s.keys())
         self.log.info(self.enabled_appstores.keys())
         self.osm_manager.sync_appstores()
         # Start A Scheduled Event for Syncing OSM data
@@ -83,36 +72,30 @@ class OSMInstaller(MycroftSkill):
         utterance = message.data.get("description", "")
         if utterance is not None:
             results = self.osm_manager.search_skills(utterance)
-            for s in results:
-                if s.skill_name is not None:
+            for m_skill in results:
+                if m_skill.skill_name is not None:
                     self.search_skills_model.append({
-                        "title": s.skill_name,
-                        "description": s.skill_description,
-                        "logo": s.json.get("logo"),
-                        "author": s.skill_author,
-                        "category": s.skill_category,
-                        "url": s.url
+                        "title": m_skill.skill_name,
+                        "description": m_skill.skill_description,
+                        "logo": m_skill.json.get("logo"),
+                        "author": m_skill.skill_author,
+                        "category": m_skill.skill_category,
+                        "url": m_skill.url
                         })
 
             self.gui["appstore_pling_model"] = self.search_skills_model
 
     def build_skills_model(self, appstore):
-        self.log.info("Building model for " + appstore)
+        self.log.info(f"Building model for {appstore}")
 
         if appstore in self.enabled_appstores:
             if appstore == "ovos":
                 self.log.info("Selected OVOS Appstore")
-                # appstore_ovos_model = self.build_ovos_skills_model()
-                # self.ovos_storage["model"] = appstore_ovos_model
                 _ = self.build_ovos_skills_model()
                 self.appstores["ovos"].storage.store()
             elif appstore == "pling":
                 self.log.info("Selected Pling Appstore")
-                # if "model" not in self.pling_storage:
                 if "model" not in self.appstores["pling"].storage:
-                    # appstore_pling_model = self.build_pling_skills_model()
-                    # self.pling_storage["model"] = appstore_pling_model
-                    # self.pling_storage.store()
                     _  = self.build_pling_skills_model()
                     self.appstores["pling"].storage.store()
         else:
@@ -120,23 +103,22 @@ class OSMInstaller(MycroftSkill):
 
     # Build Custom Display Model For OVOS Skill Store
     def build_ovos_skills_model(self):
-        # self.ovos_skills_model.clear()
         self.appstores["ovos"].model.clear()
-        for s in get_ovos_skills(parse_github=False):
-            if s.skill_name is not None:
-                self.log.info(validators.url(s.skill_icon))
-                if validators.url(s.skill_icon):
-                    skill_icon = s.skill_icon
+        for m_skill in self.appstores["ovos"]:
+            if m_skill.skill_name is not None:
+                self.log.info(validators.url(m_skill.skill_icon))
+                if validators.url(m_skill.skill_icon):
+                    skill_icon = m_skill.skill_icon
                 else:
                     skill_icon = "https://iconarchive.com/download/i103156\
                     /blackvariant/button-ui-requests-9/Parcel.ico"
                 self.appstores["ovos"].model.append({
-                    "title": s.skill_name,
-                    "description": s.skill_description,
+                    "title": m_skill.skill_name,
+                    "description": m_skill.skill_description,
                     "logo": skill_icon,
-                    "author": s.skill_author,
-                    "category": s.skill_category,
-                    "url": s.url
+                    "author": m_skill.skill_author,
+                    "category": m_skill.skill_category,
+                    "url": m_skill.url
                     })
 
         return self.appstores["ovos"]
@@ -144,15 +126,15 @@ class OSMInstaller(MycroftSkill):
     # Build Custom Display Model For Pling Skill Store
     def build_pling_skills_model(self):
         self.appstores["pling"].model.clear()
-        for s in get_pling_skills(parse_github=False):
-            if s.skill_name is not None:
+        for m_skill in self.appstores["pling"]:
+            if m_skill.skill_name is not None:
                 self.appstores["pling"].model.append({
-                    "title": s.skill_name,
-                    "description": s.skill_description,
-                    "logo": s.json.get("logo"),
-                    "author": s.skill_author,
-                    "category": s.skill_category,
-                    "url": s.url
+                    "title": m_skill.skill_name,
+                    "description": m_skill.skill_description,
+                    "logo": m_skill.json.get("logo"),
+                    "author": m_skill.skill_author,
+                    "category": m_skill.skill_category,
+                    "url": m_skill.url
                     })
 
         return self.appstores["pling"].model
@@ -180,11 +162,11 @@ class OSMInstaller(MycroftSkill):
     def update_display_data(self):
         self.gui["installer_status"] = 0 # Idle / Unknown
         try:
-            self.gui["appstore_ovos_model"] = self.appstores["ovos"].model #self.ovos_storage["model"]
+            self.gui["appstore_ovos_model"] = self.appstores["ovos"].model
         except KeyError:
             pass
         try:
-            self.gui["appstore_pling_model"] = self.appstores["pling"].model #self.pling_storage["model"]
+            self.gui["appstore_pling_model"] = self.appstores["pling"].model
         except KeyError:
             pass
 
@@ -192,13 +174,13 @@ class OSMInstaller(MycroftSkill):
         self.log.info("Installer Successful")
         self.gui["installer_status"] = 2 # Success
         time.sleep(2)
-        update_display_model()
+        self.update_display_model()
 
     def display_installer_failure(self):
         self.log.info("Installer Failed")
         self.gui["installer_status"] = 3 # Fail
         time.sleep(2)
-        update_display_model()
+        self.update_display_model()
 
 def create_skill():
     return OSMInstaller()
