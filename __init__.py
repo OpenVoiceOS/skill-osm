@@ -4,6 +4,7 @@ import time
 import validators
 from mycroft.skills.core import (MycroftSkill,
                                  intent_file_handler)
+from ovos_skills_manager.github.utils import author_repo_from_github_url
 from ovos_skills_manager.osm import OVOSSkillsManager
 
 
@@ -18,6 +19,8 @@ class OSMInstaller(MycroftSkill):
                         /blackvariant/button-ui-requests-9/Parcel.ico"
 
     def initialize(self):
+        self.osm_manager.bind(self.bus)
+
         self.add_event("OSMInstaller.openvoiceos.home",
                        self.handle_display_home)
         self.add_event("osm.sync.finish",
@@ -33,6 +36,7 @@ class OSMInstaller(MycroftSkill):
 
     @intent_file_handler("show-osm.intent")
     def handle_display_home(self, message):
+        self.update_display_model()
         self.gui.show_page("AppstoreHome.qml", override_idle=True)
 
     @intent_file_handler("search-osm.intent")
@@ -44,7 +48,7 @@ class OSMInstaller(MycroftSkill):
             for s in results:
                 skills.append({
                     "title": s.skill_name or s.uuid,
-                    "description": s.skill_description,
+                    "description": s.skill_short_description,
                     "logo": s.json.get(
                         "logo") or s.skill_icon or self.default_icon,
                     "author": s.skill_author,
@@ -66,21 +70,29 @@ class OSMInstaller(MycroftSkill):
                 # discard bad paths for now
                 skill_icon = self.default_icon
 
+            author, repo = author_repo_from_github_url(skill.url)
+            desc = skill.skill_short_description or \
+                   skill.skill_description or \
+                   f"{repo} by {author}"
             skills_model.append({
-                "title": skill.skill_name or skill.uuid,
-                "description": skill.skill_description,
+                "title": skill.skill_name or repo,
+                "description": desc,
                 "logo": skill.json.get("logo") or skill_icon,
                 "author": skill.skill_author,
                 "category": skill.skill_category,
                 "url": skill.url
             })
+
         return skills_model
 
     def handle_install(self, message):
         skill_url = message.data.get("url")
         self.gui["installer_status"] = 1  # Running
         self.log.info("Got request to install: " + skill_url)
-        self.osm_manager.install_skill_from_url(skill_url)
+        try:
+            self.osm_manager.install_skill_from_url(skill_url)
+        except Exception as e:
+            self.log.exception(e)
 
     def sync_osm_model(self, message):
         self.osm_manager.sync_appstores()
@@ -94,13 +106,13 @@ class OSMInstaller(MycroftSkill):
         self.log.info("Installer Successful")
         self.gui["installer_status"] = 2  # Success
         time.sleep(2)
-        self.update_display_model()
+        self.gui["installer_status"] = 0  # Idle / Unknown
 
     def display_installer_failure(self, message):
         self.log.info("Installer Failed")
         self.gui["installer_status"] = 3  # Fail
         time.sleep(2)
-        self.update_display_model()
+        self.gui["installer_status"] = 0  # Idle / Unknown
 
 
 def create_skill():
